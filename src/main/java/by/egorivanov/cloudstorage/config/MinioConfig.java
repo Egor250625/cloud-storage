@@ -1,0 +1,32 @@
+package by.egorivanov.cloudstorage.config;
+
+import by.egorivanov.cloudstorage.config.properties.MinioProperties;
+import io.minio.BucketExistsArgs;
+import io.minio.MakeBucketArgs;
+import io.minio.MinioClient;
+import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+@Configuration
+@RequiredArgsConstructor
+public class MinioConfig {
+    private final MinioProperties minioProperties;
+
+    @Bean
+    public MinioClient minioClient() throws Exception {
+        MinioClient minio = MinioClient.builder()
+                .endpoint(minioProperties.getUrl())
+                .credentials(minioProperties.getAccessKey(), minioProperties.getSecretKey())
+                .build();
+        boolean bucketExists = minio.bucketExists(BucketExistsArgs.builder()
+                .bucket(minioProperties.getBucket())
+                .build());
+        if (!bucketExists) {
+            minio.makeBucket(MakeBucketArgs.builder()
+                    .bucket(minioProperties.getBucket())
+                    .build());
+        }
+        return minio;
+    }
+}

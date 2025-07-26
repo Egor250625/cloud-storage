@@ -1,0 +1,64 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: 'postgres:17'
+    container_name: postgres-db
+    restart: always
+    env_file:
+      - postgres.env
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - cloudnet
+  frontend:
+    build:
+      context: ./frontend
+    container_name: frontend
+    ports:
+      - "3000:80"
+    networks:
+      - cloudnet
+  redis:
+    image: redis:7-alpine
+    container_name: redis
+    ports:
+      - "6379:6379"
+    networks:
+      - cloudnet
+  backend:
+    build:
+      context: .
+    container_name: cloud-storage
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
+      - minio
+      - redis
+    networks:
+      - cloudnet
+  minio:
+    image: minio/minio:latest
+    container_name: minio
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    env_file:
+      - minio.env
+    command: server /data --console-address ":9001"
+    volumes:
+      - minio-data:/data
+    restart: unless-stopped
+    networks:
+      cloudnet:
+
+networks:
+  cloudnet:
+
+volumes:
+  postgres_data:
+  minio-data:
+

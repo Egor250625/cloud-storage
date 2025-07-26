@@ -1,0 +1,7 @@
+package by.egorivanov.cloudstorage.exception;
+
+public class UserAlreadyExistsException extends RuntimeException {
+    public UserAlreadyExistsException(String message) {
+        super(message);
+    }
+}

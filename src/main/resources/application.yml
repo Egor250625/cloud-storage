@@ -1,0 +1,64 @@
+spring:
+  config:
+    import: classpath:application-secrets.yml
+  servlet:
+    multipart:
+      max-file-size: 200MB
+      max-request-size: 200MB
+  datasource:
+    url: jdbc:postgresql://postgres:5432/postgres?currentSchema=cloud_file_storage
+    username: ${secrets.postgres.username}
+    password: ${secrets.postgres.password}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 10
+  jpa:
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        show_sql: true
+        format_sql: true
+        hbm2ddl.auto: validate
+        check-schema: validate_strict
+        default-schema: cloud_file_storage
+    open-in-view: false
+  liquibase:
+    change-log: classpath:db.changelog/db.changelog-master.yaml
+    default-schema: cloud_file_storage
+  docker:
+    compose:
+      enabled: true
+  data:
+    redis:
+      host: ${secrets.redis.host}
+      port: ${secrets.redis.port}
+
+
+
+server:
+  tomcat:
+    max-swallow-size: 200MB
+  servlet:
+    session:
+      cookie:
+        max-age: 30m
+        name: SESSION
+        http-only: true
+        secure: false
+        path: /
+
+
+minio:
+  url: ${secrets.minio.url}
+  access-key: ${secrets.minio.access-key}
+  secret-key: ${secrets.minio.secret-key}
+  bucket: ${secrets.minio.bucket}
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    csrf:
+      enabled: false
+    disable-swagger-default-url: true
